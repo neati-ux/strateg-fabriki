@@ -1,0 +1,3 @@
+#!/bin/sh
+# Короткий запуск команд: ./strateg check, ./strateg cost
+exec sh "$(cd "$(dirname "$0")" && pwd)/tools/run.sh" strateg.py "$@"

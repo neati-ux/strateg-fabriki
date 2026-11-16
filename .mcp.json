@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "strateg": {
+      "command": "sh",
+      "args": [
+        "tools/run.sh",
+        "mcp_server.py"
+      ]
+    }
+  }
+}

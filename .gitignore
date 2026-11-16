@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+*.tmp
+__pycache__/
+.DS_Store
