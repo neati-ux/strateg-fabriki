@@ -4,3 +4,11 @@
 *.tmp
 __pycache__/
 .DS_Store
+
+.venv-media/
+execution.sqlite3*
+*.local.json
+*.local.jsonl
+.registry-lock.sqlite3*
+.claude-sync.sqlite3*
+.browser-runtime/

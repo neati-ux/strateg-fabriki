@@ -1,0 +1,60 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/tools/run.sh\" hook_log.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/tools/run.sh\" hook_log.py"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/tools/run.sh\" hook_log.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/tools/run.sh\" hook_log.py"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ],
+    "ask": [
+      "Bash(python3 tools/strateg.py gate confirm:*)",
+      "Bash(python tools/strateg.py gate confirm:*)",
+      "Bash(./strateg gate confirm:*)",
+      "Bash(strateg gate confirm:*)",
+      "Bash(strateg.cmd gate confirm:*)",
+      "Bash(py -3 tools/strateg.py gate confirm:*)",
+      "Bash(py tools/strateg.py gate confirm:*)"
+    ]
+  }
+}

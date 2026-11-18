@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "provider": "openai",
+  "created_at": "2026-11-17T21:45:39+00:00",
+  "case_path": "../case",
+  "case_sha256": "5daf4f1f71d2da38298855120e95f377ee5948df2ff479372e53e19a9aeeb12f",
+  "status": "NOT_RUN",
+  "attempts": []
+}
