@@ -26,10 +26,10 @@ def detect_host(env):
     return {'host': signals[0] if len(signals) == 1 else 'unknown', 'signals': signals}
 
 
-def discover(args):
+def host_catalog(explicit_host=None):
     detected = detect_host(os.environ)
-    host = args.host or detected['host']
-    result = dict(detected, host=host, source='explicit' if args.host else 'environment',
+    host = explicit_host or detected['host']
+    result = dict(detected, host=host, source='explicit' if explicit_host else 'environment',
                   catalog_status='unknown', listed=[], verified_for_billing=False)
     if host == 'opencode':
         executable = shutil.which('opencode')
@@ -44,7 +44,22 @@ def discover(args):
                 result['reason'] = 'Команда каталога недоступна'
         else:
             result['reason'] = 'CLI opencode отсутствует в PATH этого процесса'
-    emit(result)
+    return result
+
+
+def discover(args):
+    emit(host_catalog(args.host))
+
+
+def startup_route():
+    catalog = host_catalog()
+    lines = [f"Среда: {catalog['host']}.", "Выбор маршрута: принять рекомендованный или собрать свой для исследования и критики."]
+    if catalog['listed']:
+        lines.append("Точные ID из каталога OpenCode: " + ", ".join(catalog['listed']))
+    else:
+        lines.append("Каталог CLI недоступен. Если хост предоставляет каталог сессии, укажи источник и дословные ID из него; иначе выбор конкретных моделей пока неизвестен.")
+    lines.append("Покажи выбор в первом ответе. Для каждой роли предлагай только совместимые назначения из проверенного inventory. Без подтверждённых тарифов и контекста смета неизвестна.")
+    return "\n".join(lines)
 
 
 def inspect_local():

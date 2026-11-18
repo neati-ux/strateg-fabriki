@@ -314,6 +314,8 @@ def cmd_new(a):
         f.write_text(t.replace("{{имя}}", a.name).replace("{{дата}}", now), encoding="utf-8")
     ACTIVE.write_text(a.name + "\n", encoding="utf-8")
     print(f"Создан проект projects/{a.name}/ и сделан активным. Дальше: шаг 1, skills/1-zadacha.md")
+    from capabilities import startup_route
+    print(startup_route())
 
 
 def cmd_use(a):
