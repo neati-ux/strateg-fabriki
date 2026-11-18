@@ -8,11 +8,43 @@ import math
 import shutil
 import sys
 import tempfile
+import os
+import subprocess
 from contextlib import closing
 from pathlib import Path
 
 ROLES = ("extractor", "analyst", "researcher", "critic", "strategist")
 PRICE_BASIS = "USD per 1M input + 1M output tokens, excluding cache"
+
+
+def detect_host(env):
+    markers = {'opencode': ('OPENCODE', 'OPENCODE_CLIENT'), 'codex': ('CODEX_THREAD_ID',),
+               'claude': ('CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT'), 'cursor': ('CURSOR_TRACE_ID', 'CURSOR_AGENT')}
+    signals = [host for host, keys in markers.items() if any(env.get(k) not in (None, '', '0', 'false') for k in keys)]
+    if env.get('TERM_PROGRAM', '').lower() == 'cursor' and 'cursor' not in signals:
+        signals.append('cursor')
+    return {'host': signals[0] if len(signals) == 1 else 'unknown', 'signals': signals}
+
+
+def discover(args):
+    detected = detect_host(os.environ)
+    host = args.host or detected['host']
+    result = dict(detected, host=host, source='explicit' if args.host else 'environment',
+                  catalog_status='unknown', listed=[], verified_for_billing=False)
+    if host == 'opencode':
+        executable = shutil.which('opencode')
+        if executable:
+            try:
+                response = subprocess.run([executable, 'models'], capture_output=True, text=True,
+                                          encoding='utf-8', errors='replace', timeout=12, check=True)
+                listed = sorted({line.strip() for line in response.stdout.splitlines()
+                                 if re.fullmatch(r'[\w.-]+/[\w./:-]+', line.strip())})
+                result.update(listed=listed, catalog_status='listed' if listed else 'unknown')
+            except (OSError, subprocess.SubprocessError):
+                result['reason'] = 'Команда каталога недоступна'
+        else:
+            result['reason'] = 'CLI opencode отсутствует в PATH этого процесса'
+    emit(result)
 
 
 def inspect_local():
@@ -267,6 +299,9 @@ def cmd_claude_sync(args):
 def register(sub):
     cap = sub.add_parser("capabilities", help="локальные инструменты и явный список моделей")
     actions = cap.add_subparsers(dest="capabilities_action", required=True)
+    p = actions.add_parser('discover', help='определить хост и запросить каталог без вызова модели')
+    p.add_argument('--host', choices=['opencode', 'cursor', 'claude', 'codex'])
+    p.set_defaults(fn=discover)
     actions.add_parser("inspect", help="проверить исполняемые файлы без входа в сервисы").set_defaults(fn=cmd_inspect)
     p = actions.add_parser("template", help="создать пустой inventory")
     p.add_argument("--output", required=True)

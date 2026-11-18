@@ -342,6 +342,7 @@ def command(a):
             result = {'step': request['workflow_step'], 'request': a.output,
                       'next': 'выбор пользователя' if quote else 'route-preview'}
             if quote:
+                result['custom_choices_by_operation'] = quote['custom_choices_by_operation']
                 result.update(recommended=quote['recommended_mode'], reason=quote['reason'], plans={
                     mode: {'status': option['status'], 'estimated_usd': option['estimated_usd'],
                            'estimated_with_one_fallback_each_usd': option['estimated_with_one_fallback_each_usd'],

@@ -62,6 +62,15 @@ def preview(inventory, request, budget=None):
             if not isinstance(identity, list) or len(identity) != 2 or not all(isinstance(v, str) for v in identity):
                 raise ValueError('Назначение custom: [provider, model_id]')
     plans = {}
+    manual_choices = {}
+    for task in tasks:
+        if task['role'] == 'code':
+            continue
+        manual_choices[task['id']] = [
+            [m['provider'], m['id']] for m, _, rates, context in models
+            if m['available'] and task['role'] in m['roles'] and rates is not None
+            and context is not None and context >= task['input_tokens'] + task['max_output_tokens']
+            and set(task.get('requires', [])) <= set(m.get('features', []))]
     for mode in (*MODES, 'custom') if custom is not None else MODES:
         steps = []
         total = Decimal(0)
@@ -124,6 +133,7 @@ def preview(inventory, request, budget=None):
             'recommended_mode': available[-1] if available else None,
             'budget_usd': str(budget) if budget is not None else None,
             'plans': plans,
+            'custom_choices_by_operation': manual_choices,
             'notice': 'Оценка по заданным токенам и тарифам. Без повторов, кэша и расходов текущего чата. Нужен выбор пользователя.'}
 
 
