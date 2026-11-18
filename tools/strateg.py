@@ -751,7 +751,12 @@ def cmd_cost(a):
                 cost_s = f"{cost:.4f} {cur}"
             print(f"| {model} | {u['input']} | {u['output']} | {u['cache_read']} | "
                   f"{u['cache_write']} | {cost_s} |")
-        print(f"\nИтого: {grand:.4f} {cur}")
+        if not unknown:
+            print(f"\nИтого: {grand:.4f} {cur}")
+        else:
+            print("\nИтого: неизвестно")
+            if len(unknown) < len(total):
+                print(f"Оценённая часть: {grand:.4f} {cur}")
         if unknown:
             print("Не посчитаны, нет цены в routing/prices.json: " + ", ".join(unknown))
         base = prices.get("база_для_сравнения")
@@ -768,7 +773,10 @@ def cmd_cost(a):
         limit = budget_limit(proj, prices)
         if limit:
             share = grand / limit
-            print(f"Бюджет проекта: {grand:.2f} из {limit:.2f} {cur} ({share:.0%}).")
+            if unknown:
+                print(f"Бюджет проекта: {limit:.2f} {cur}; общая доля расхода неизвестна.")
+            else:
+                print(f"Бюджет проекта: {grand:.2f} из {limit:.2f} {cur} ({share:.0%}).")
             if share >= 1:
                 print("БЮДЖЕТ ИСЧЕРПАН: остановись и спроси руководителя, продолжать ли "
                       "(новый лимит: budget --set N).")
@@ -776,7 +784,7 @@ def cmd_cost(a):
                 print("ВНИМАНИЕ: израсходовано больше 80% бюджета. Предупреди руководителя и экономь: "
                       "меньше повторных чтений, простую работу на дешёвую модель.")
     else:
-        print("\n- Данных о токенах нет. В Claude Code они появляются после ответа агента, "
+        print("\nИтого: неизвестно. Данных о токенах нет. В Claude Code они появляются после ответа агента, "
               "в Кодексе — после первого сеанса в этой папке.")
 
 

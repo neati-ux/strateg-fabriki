@@ -229,7 +229,13 @@ def cmd_gate(a):
         return
     if not a.by or len(a.by.strip()) < 2:
         S.die("укажи слова руководителя: --by \"…\"")
+    metric = getattr(a, "metric", None)
+    if metric is not None and (a.step != "1" or not metric.strip()):
+        S.die("--metric: укажи согласованный показатель на шаге 1")
+    previous_metric = g.get(a.step, {}).get("metric")
     g[a.step] = {"at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "by": a.by.strip()}
+    if metric or previous_metric:
+        g[a.step]["metric"] = metric.strip() if metric else previous_metric
     (proj / "gates.json").write_text(json.dumps(g, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Развилка шага {a.step} закрыта: {GATES[a.step].lower()}.")
 
@@ -601,6 +607,7 @@ def register(sub):
     s = g.add_parser("confirm", help="записать решение руководителя на развилке")
     s.add_argument("step", choices=list(GATES))
     s.add_argument("--by", required=True, help="слова руководителя, как он их написал")
+    s.add_argument("--metric", help="подтверждённая формулировка основной метрики шага 1")
     s.set_defaults(fn=cmd_gate)
     g.add_parser("list", help="состояние развилок").set_defaults(fn=cmd_gate)
     s = sub.add_parser("report", help="собрать отчёт одной страницей outputs/REPORT.html")

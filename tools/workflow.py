@@ -215,6 +215,9 @@ def validate(project, step, value):
 
     if step == 4:
         options = value.get('options')
+        metric = extra.load_gates(project).get('1', {}).get('metric')
+        if metric and metric.casefold() not in docs[paths[0]].casefold():
+            raise ValueError('В сравнении вариантов укажи согласованный основной показатель: ' + metric)
         if not isinstance(options, list) or not 3 <= len(options) <= 5:
             raise ValueError('Нужно от трёх до пяти вариантов')
         names = set()
@@ -242,6 +245,8 @@ def validate(project, step, value):
             if not isinstance(item, dict) or not isinstance(item.get('text'), str) or not item['text'].strip() or item['text'].strip() not in communication:
                 raise ValueError('Обещание должно быть дословно в коммуникационной стратегии')
             cited_basis(item, 'Обещание')
+            if not any(c['id'] in item['basis'] and c['тип'] == 'факт' for c in claims):
+                raise ValueError('Для обещания нужен проверяемый факт о продукте; при нехватке данных уточни формулировку')
             if any(i not in set(CITATION.findall(communication)) for i in item['basis']):
                 raise ValueError('В коммуникационной стратегии не указано основание обещания')
     if step == 6:
@@ -249,6 +254,9 @@ def validate(project, step, value):
         required = ('metric', 'baseline', 'window', 'decision_rule')
         if not isinstance(measurement, dict) or any(not isinstance(measurement.get(k), str) or not measurement[k].strip() or measurement[k].strip() not in docs[paths[0]] for k in required):
             raise ValueError('В плане проверки нужны метрика, база, период и условие решения')
+        agreed = extra.load_gates(project).get('1', {}).get('metric')
+        if agreed and measurement['metric'].strip().casefold() != agreed.casefold():
+            raise ValueError('Основная метрика отличается от согласованной: ' + agreed)
     if step == 7 and not extra.decisions(project):
         raise ValueError('Сначала запиши фактическое решение руководителя в журнале решений')
 
