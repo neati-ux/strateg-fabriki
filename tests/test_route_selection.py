@@ -37,3 +37,9 @@ class Routing(unittest.TestCase):
         self.assertEqual(preview(inv, request, 0)['plans']['custom']['status'], 'over_budget')
         request['custom']['review'] = ['test','off']
         self.assertEqual(preview(inv, request)['plans']['custom']['status'], 'incomplete')
+        del inv['models'][1]['rates_usd_per_million']
+        request['custom']['review'] = ['test', 'b']
+        result = preview(inv, request)
+        self.assertIn(['test', 'b'], result['custom_choices_by_operation']['review'])
+        self.assertIsNone(result['plans']['custom']['estimated_usd'])
+        self.assertEqual(result['plans']['custom']['status'], 'incomplete')

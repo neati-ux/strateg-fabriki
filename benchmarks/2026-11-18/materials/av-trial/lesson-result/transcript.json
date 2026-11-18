@@ -1,0 +1,83 @@
+{
+  "source_name": "lesson.mp4",
+  "source_sha256": "bc1aa0f133c419f313f75631774451ea9d53f15ba55a4a8257bde66684498aba",
+  "transcript_sha256": "b7ad20ff3e29edb2d7c4952918ec0eccab97c4f5ac847fb7135ab8e354f4d478",
+  "engine": "local-faster-whisper:C:\\Users\\User\\.cache\\huggingface\\hub\\models--Systran--faster-whisper-tiny\\snapshots\\d90ca5fe260221311c53c58e660288d3deb8d356",
+  "created_at": "2026-11-18T18:38:35.331408+00:00",
+  "verification": "Требуется сверка существенных цитат с оригиналом",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "text": "The school opened on Monday."
+    },
+    {
+      "start": 2.0,
+      "end": 6.0,
+      "text": "Students asked for a reminder before the next lesson."
+    }
+  ],
+  "frames": [
+    {
+      "file": "frame-00.jpg",
+      "seconds": 0.0,
+      "sha256": "4c8134aa9e4683a768104d5c462ae85b1cd8bd8446f742dedbcb7e54875deaa5"
+    },
+    {
+      "file": "frame-01.jpg",
+      "seconds": 0.4916666666666667,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-02.jpg",
+      "seconds": 0.9833333333333334,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-03.jpg",
+      "seconds": 1.4750000000000003,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-04.jpg",
+      "seconds": 1.9666666666666668,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-05.jpg",
+      "seconds": 2.4583333333333335,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-06.jpg",
+      "seconds": 2.9500000000000006,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-07.jpg",
+      "seconds": 3.441666666666667,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-08.jpg",
+      "seconds": 3.9333333333333336,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-09.jpg",
+      "seconds": 4.425,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-10.jpg",
+      "seconds": 4.916666666666667,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    },
+    {
+      "file": "frame-11.jpg",
+      "seconds": 5.408333333333334,
+      "sha256": "e0eb17a89bb2227ab1a9c8face6be0f96f12b2e7e2f9a6666b30beb5d39baee5"
+    }
+  ],
+  "visual_review": "Кадры подготовлены для просмотра; содержание ещё не проанализировано"
+}

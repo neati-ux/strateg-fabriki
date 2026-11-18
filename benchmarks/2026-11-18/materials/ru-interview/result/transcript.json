@@ -1,0 +1,25 @@
+{
+  "source_name": "interview.wav",
+  "source_sha256": "6f902795b5b51ff79b189f9dcca47e423c76022eddcaaad3cf05bdfa76cea014",
+  "transcript_sha256": "d15a3190056149ba49fb38727ea38157c7d95c0be0782addc4c334f949d42877",
+  "engine": "local-faster-whisper:C:\\Users\\User\\.cache\\huggingface\\hub\\models--Systran--faster-whisper-tiny\\snapshots\\d90ca5fe260221311c53c58e660288d3deb8d356",
+  "created_at": "2026-11-18T18:41:28.424129+00:00",
+  "verification": "Требуется сверка существенных цитат с оригиналом",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "text": "Меня зовут Анна."
+    },
+    {
+      "start": 2.0,
+      "end": 7.0,
+      "text": "Павел, сколько команда платили первый месяц."
+    },
+    {
+      "start": 7.0,
+      "end": 11.0,
+      "text": "Анна, первый месяц оплатили 47 команда."
+    }
+  ]
+}

@@ -67,8 +67,8 @@ def preview(inventory, request, budget=None):
         if task['role'] == 'code':
             continue
         manual_choices[task['id']] = [
-            [m['provider'], m['id']] for m, _, rates, context in models
-            if m['available'] and task['role'] in m['roles'] and rates is not None
+            [m['provider'], m['id']] for m, _, _, context in models
+            if m['available'] and task['role'] in m['roles']
             and context is not None and context >= task['input_tokens'] + task['max_output_tokens']
             and set(task.get('requires', [])) <= set(m.get('features', []))]
     for mode in (*MODES, 'custom') if custom is not None else MODES:

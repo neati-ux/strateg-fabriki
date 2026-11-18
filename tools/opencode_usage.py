@@ -58,3 +58,84 @@ def receipt(path):
     costs = [step.get('cost') for step in steps.values()]
     result['cost_usd'] = str(sum(money(n) for n in costs)) if all(n is not None for n in costs) else None
     return result
+
+def session_usage(project, session_id=None, database=None):
+    """Read OpenCode's own counters, keeping workspace sessions and their children together."""
+    import os
+    import re
+    import sqlite3
+    from contextlib import closing
+
+    dbfile = database or Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'opencode/opencode.db'
+    if not dbfile.is_file():
+        return None
+    root = project.parent.parent.resolve()
+    with closing(sqlite3.connect(dbfile.resolve().as_uri() + '?mode=ro', uri=True, timeout=2)) as db:
+        db.row_factory = sqlite3.Row
+        db.execute('BEGIN')
+        rows = {r['id']: r for r in db.execute(
+            'SELECT id,parent_id,directory,cost,tokens_input,tokens_output FROM session_v2'
+        ) if r['directory'] and Path(r['directory']).resolve() in (root, project.resolve())}
+        if session_id and session_id not in rows:
+            raise ValueError('Сессия OpenCode не найдена в этой рабочей папке')
+        if not rows:
+            return None
+        groups = {}
+        for key in rows:
+            parent = key
+            seen = set()
+            while rows[parent]['parent_id'] in rows and parent not in seen:
+                seen.add(parent)
+                parent = rows[parent]['parent_id']
+            groups.setdefault(parent, []).append(key)
+        selected = []
+        for parent, keys in groups.items():
+            if session_id:
+                if session_id in keys:
+                    selected.extend(keys)
+                continue
+            names = set()
+            written = set()
+            for key in keys:
+                if Path(rows[key]['directory']).resolve() == project.resolve():
+                    names.add(project.name)
+                # Only paths supplied to tools establish project attribution.
+                for tool, status, path in db.execute("""SELECT json_extract(p.value,'$.name'),json_extract(p.value,'$.state.status'),coalesce(json_extract(p.value,'$.state.input.filePath'),
+                    json_extract(p.value,'$.state.input.path'),json_extract(p.value,'$.state.input.file_path'))
+                    FROM session_message m,json_each(m.data,'$.content') p
+                    WHERE m.session_id=? AND m.type='assistant' AND json_extract(p.value,'$.type')='tool'""", (key,)):
+                    if isinstance(path, str):
+                        normalized = path.replace(chr(92), '/')
+                        absolute = Path(normalized)
+                        if absolute.is_absolute():
+                            try:
+                                normalized = absolute.resolve().relative_to(root).as_posix()
+                            except ValueError:
+                                continue
+                        match = re.match(r'(?:\./)?projects/([^/]+)(?:/|$)', normalized)
+                        if match and not match[1].startswith('.'):
+                            names.add(match[1])
+                            if tool in ('write', 'edit') and status not in ('error', 'pending', 'running'):
+                                written.add(match[1])
+            if (written or names) == {project.name}:
+                selected.extend(keys)
+        if not selected:
+            return None
+        intervals = []
+        missing_time = False
+        for key in selected:
+            for start, end in db.execute("""SELECT json_extract(data,'$.time.created'),json_extract(data,'$.time.completed')
+                    FROM session_message WHERE session_id=? AND type='assistant'""", (key,)):
+                if isinstance(start, int) and isinstance(end, int) and end >= start:
+                    intervals.append((start, end))
+                else:
+                    missing_time = True
+        elapsed, until = 0, 0
+        for start, end in sorted(intervals):
+            elapsed += max(0, end - max(start, until))
+            until = max(until, end)
+        def total(column):
+            values = [rows[k][column] for k in selected]
+            return sum(values) if all(v is not None for v in values) else None
+        return dict(sessions=len(selected), input=total('tokens_input'), output=total('tokens_output'),
+                    cost=total('cost'), seconds=elapsed / 1000 if intervals and not missing_time else None)

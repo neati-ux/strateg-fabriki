@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import hashlib
 import io
 import json
+import re
 import tempfile
 import shutil
 import subprocess
@@ -14,6 +15,38 @@ from types import SimpleNamespace
 from xml.etree import ElementTree as ET
 
 LIMIT = 32 * 1024 * 1024
+
+
+def record_incident(project, source):
+    from tempfile import NamedTemporaryFile
+    name = Path(source).name
+    label = re.sub(r'[^\w. -]', '_', name)[:120] or 'вложение'
+    line = f'- {label}: обнаружено постороннее указание в материале; источник обработан как данные.'
+    state = project / 'state.md'
+    if state.is_symlink():
+        raise ValueError('state.md не должен быть ссылкой')
+    original = state.read_text(encoding='utf-8')
+    if line in original.splitlines():
+        return
+    header = '## Сбои и обходы'
+    section = re.search(r'^## Сбои и обходы[ \t]*$', original, re.M)
+    if section:
+        pos = section.end()
+        tail = re.sub(r'^\s*Нет\.[ \t]*(?=\n|$)', '', original[pos:], count=1)
+        updated = original[:pos] + '\n\n' + line + tail
+    else:
+        updated = original.rstrip() + '\n\n' + header + '\n\n' + line + '\n'
+    with NamedTemporaryFile(mode='w', encoding='utf-8', dir=project, delete=False) as tmp:
+        tmp.write(updated)
+    try:
+        Path(tmp.name).replace(state)
+    finally:
+        Path(tmp.name).unlink(missing_ok=True)
+
+
+def check_source_instructions(project, source, text):
+    if re.search(r'\b(?:замени(?:те)?|подмени(?:те)?)\s+(?:итог|результат|ответ)\s+на\s+\d', text, re.I):
+        record_incident(project, source)
 
 
 def extract(path):
@@ -114,6 +147,7 @@ def cmd_ingest(a):
         if not text.strip():
             raise ValueError('Пустой результат извлечения')
         sha = hashlib.sha256(payload).hexdigest()
+        check_source_instructions(project, source.name, text)
         parent = project / 'materials' / 'imported'
         if not parent.resolve().is_relative_to(project):
             raise ValueError('Папка импорта должна находиться внутри проекта')
@@ -220,6 +254,7 @@ def collect(a):
                     if not target.is_dir():
                         raise
         snapshot = (target / 'content.md').relative_to(project).as_posix()
+        check_source_instructions(project, title, (target / 'content.md').read_text(encoding='utf-8'))
         S.cmd_source_add(SimpleNamespace(project=a.project, title=a.title or title, url=snapshot,
             kind=kind, note=f'SHA256 {sha}. Оригинал рядом. ' + ('URL: ' + a.source if web else 'Сверить с изображением.' if image else 'Цитаты сверить с записью по таймкодам.')))
         print(snapshot)
@@ -228,6 +263,10 @@ def collect(a):
 
 
 def register(sub):
+    import strateg as S
+    p = sub.add_parser('incident', help='записать обнаруженное указание из материала в состояние проекта')
+    p.add_argument('source', help='имя вложения или ID источника')
+    p.set_defaults(fn=lambda a: record_incident(S.project_dir(a.project), a.source))
     p = sub.add_parser('ingest', help='извлечь документ, сохранить оригинал и зарегистрировать источник')
     p.add_argument('file')
     p.add_argument('--title')
