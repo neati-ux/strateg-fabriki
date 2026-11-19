@@ -251,6 +251,9 @@ def validate(project, step, value):
                 raise ValueError('В коммуникационной стратегии не указано основание обещания')
     if step == 6:
         measurement = value.get('measurement')
+        calendar_errors = S.calendar_problems(docs[paths[0]], docs[paths[1]])
+        if calendar_errors:
+            raise ValueError(calendar_errors[0])
         required = ('metric', 'baseline', 'window', 'decision_rule')
         if not isinstance(measurement, dict) or any(not isinstance(measurement.get(k), str) or not measurement[k].strip() or measurement[k].strip() not in docs[paths[0]] for k in required):
             raise ValueError('В плане проверки нужны метрика, база, период и условие решения')

@@ -229,10 +229,26 @@ def check_texts(proj, claims):
     return errs, warns
 
 
+def calendar_problems(plan, summary):
+    def lines(text):
+        return [line.strip() for line in text.splitlines()
+                if line.strip().startswith('Календарь проверки:')]
+    first, second = lines(plan), lines(summary)
+    if not first and not second:
+        return []  # Existing projects predate the shared calendar.
+    if len(first) != 1 or first != second or not first[0].partition(':')[2].strip():
+        return ['Согласуй календарь проверки в плане и сводке']
+    return []
+
+
 def run_check(proj):
     sources, claims = load(proj)
     e1, w1 = check_data(sources, claims)
     e2, w2 = check_texts(proj, claims)
+    plan, summary = [proj / 'outputs' / name for name in ('5-plan-proverki.md', '0-svodka.md')]
+    if plan.is_file() and summary.is_file():
+        e2.extend(('календарь', message) for message in calendar_problems(
+            plan.read_text(encoding='utf-8'), summary.read_text(encoding='utf-8')))
     import extra
     import helpers
     revision_path = proj / 'revisions.json'
