@@ -73,8 +73,19 @@ def cmd(args):
 
 
 def register(sub):
+    import committee
     parser = sub.add_parser('delivery', help='зафиксировать сверку и собрать пакет руководителя')
     actions = parser.add_subparsers(dest='action', required=True)
     actions.add_parser('review', help='зафиксировать версию после содержательной сверки').set_defaults(fn=cmd)
     actions.add_parser('pack', help='собрать ZIP из сверенной версии').add_argument('--output', required=True)
     parser.set_defaults(fn=cmd)
+    publication = actions.add_parser('committee', help='выпустить Excel, записку PDF и презентацию')
+    publication.add_argument('--output', required=True)
+    publication.set_defaults(fn=committee.cmd)
+    import decision_screen
+    for action in ('checkpoint', 'compare'):
+        p = actions.add_parser(action, help='сохранить версию решения' if action=='checkpoint' else 'экран Было → стало')
+        p.add_argument('--output', required=True)
+        if action == 'compare':
+            p.add_argument('--before', required=True)
+        p.set_defaults(fn=decision_screen.cmd)

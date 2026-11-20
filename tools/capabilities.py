@@ -32,7 +32,11 @@ def host_catalog(explicit_host=None):
     result = dict(detected, host=host, source='explicit' if explicit_host else 'environment',
                   catalog_status='unknown', listed=[], verified_for_billing=False)
     if host == 'opencode':
-        executable = shutil.which('opencode')
+        executable = shutil.which('opencode') or shutil.which('opencode-cli')
+        if not executable and os.name == 'nt' and os.environ.get('LOCALAPPDATA'):
+            desktop_cli = Path(os.environ['LOCALAPPDATA']) / 'Programs/ai.opencode.desktop/resources/opencode-cli.exe'
+            if desktop_cli.is_file():
+                executable = str(desktop_cli)
         if executable:
             try:
                 response = subprocess.run([executable, 'models'], capture_output=True, text=True,
@@ -54,6 +58,13 @@ def discover(args):
 def startup_route():
     catalog = host_catalog()
     lines = [f"Среда: {catalog['host']}.", "Выбор маршрута: принять рекомендованный или собрать свой для исследования и критики."]
+    lines.extend([
+        "Экономный — один основной проход, минимальный ожидаемый расход.",
+        "Сбалансированный — сравнение вариантов и проверка ключевых выводов, средний ожидаемый расход.",
+        "Максимальный — дополнительные независимые проверки, наибольший ожидаемый расход.",
+        "Свой маршрут — назначить доступных исполнителей на извлечение, исследование, расчёты и критику; цена по составу.",
+        "Предложи выбрать учёт расходов: за действие (запрос и ответ), за задачу (все шаги), за сессию (этот чат).",
+    ])
     if catalog['listed']:
         lines.append("Точные ID из каталога OpenCode: " + ", ".join(catalog['listed']))
     else:

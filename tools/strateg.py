@@ -229,10 +229,34 @@ def check_texts(proj, claims):
     return errs, warns
 
 
+def calendar_problems(plan, summary):
+    def lines(text):
+        return [line.strip() for line in text.splitlines()
+                if line.strip().startswith('Календарь проверки:')]
+    first, second = lines(plan), lines(summary)
+    if not first and not second:
+        return []  # Existing projects predate the shared calendar.
+    if len(first) != 1 or first != second or not first[0].partition(':')[2].strip():
+        return ['Согласуй календарь проверки в плане и сводке']
+    return []
+
+
 def run_check(proj):
     sources, claims = load(proj)
     e1, w1 = check_data(sources, claims)
     e2, w2 = check_texts(proj, claims)
+    plan, summary = [proj / 'outputs' / name for name in ('5-plan-proverki.md', '0-svodka.md')]
+    if plan.is_file() and summary.is_file():
+        plan_text, summary_text = (file.read_text(encoding='utf-8') for file in (plan, summary))
+        e2.extend(('календарь', message) for message in calendar_problems(plan_text, summary_text))
+        # Older projects did not have this field. Once present, preserve the
+        # decision and its approval status when condensing the plan.
+        prefix = 'Бизнес-порог:'
+        thresholds = [[line.strip() for line in doc.splitlines() if line.strip().startswith(prefix)]
+                      for doc in (plan_text, summary_text)]
+        if any(thresholds) and (len(thresholds[0]) != 1 or thresholds[0] != thresholds[1]
+                                or not thresholds[0][0][len(prefix):].strip()):
+            e2.append(('порог', 'Сверь строку «Бизнес-порог:» в плане и сводке, включая статус согласования'))
     import extra
     import helpers
     revision_path = proj / 'revisions.json'
@@ -695,6 +719,37 @@ def cmd_budget(a):
 def cmd_cost(a):
     proj = project_dir(a.project)
     print(f"## Время и расходы: {proj.name}\n")
+    from opencode_usage import session_usage
+    selected = getattr(a, 'opencode_session', None)
+    try:
+        host = session_usage(proj, selected)
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        if selected:
+            die(str(exc))
+        print("Журнал OpenCode недоступен для сверки.")
+        host = None
+    if selected and not host:
+        die('Нет данных для выбранной сессии OpenCode')
+    if host:
+        seconds, cost = host['seconds'], host['cost']
+        print("OpenCode · учтённые сессии с помощниками:", host['sessions'])
+        print("Время открытых ответов (включая ожидание пользователя; параллельные интервалы объединены):",
+              f"{seconds:.1f} с" if seconds is not None else "неизвестно")
+        print("Сумма по журналу OpenCode:", f"{cost:.6f} USD" if cost is not None else "неизвестна")
+        print("Входные токены:", host['input'] if host['input'] is not None else "неизвестно",
+              "· выходные:", host['output'] if host['output'] is not None else "неизвестно")
+        price_file = ROOT / "routing" / "prices.json"
+        if cost is not None and price_file.is_file():
+            config = json.loads(price_file.read_text(encoding="utf-8"))
+            limit = budget_limit(proj, config)
+            if config.get("валюта") == "USD" and limit > 0:
+                print(f"Учтённые сессии OpenCode: {cost / limit:.1%} бюджета проекта ({limit:g} USD).")
+                if cost >= limit:
+                    print("БЮДЖЕТ ИСЧЕРПАН: согласуй дальнейшие расходы с руководителем.")
+                elif cost >= 0.8 * limit:
+                    print("Израсходовано не менее 80% бюджета проекта.")
+        if selected:
+            return
     if not a.no_codex:
         n = import_codex(proj)
         if n:
@@ -724,7 +779,7 @@ def cmd_cost(a):
         print(f"- Действий: {sum(tools.values())}, из них с ошибкой: {fails}")
         print("- По инструментам: " + ", ".join(f"{k} {v}" for k, v in
                                                sorted(tools.items(), key=lambda x: -x[1])))
-    else:
+    elif not host:
         print("- Журнал действий пуст: хуки не работали. Время смотри в log.md.")
 
     up = proj / "usage.json"
@@ -740,6 +795,8 @@ def cmd_cost(a):
     table = prices.get("за_миллион_токенов", {})
     cur = prices.get("валюта", "")
     if total:
+        if host:
+            print("Отдельный расчёт по файлу usage.json:")
         print("\n| Модель | Вход | Выход | Кэш: чтение | Кэш: запись | Стоимость |")
         print("|---|---|---|---|---|---|")
         grand, unknown = 0.0, []
@@ -785,14 +842,14 @@ def cmd_cost(a):
             elif share >= 0.8:
                 print("ВНИМАНИЕ: израсходовано больше 80% бюджета. Предупреди руководителя и экономь: "
                       "меньше повторных чтений, простую работу на дешёвую модель.")
-    else:
+    elif not host:
         print("\nИтого: неизвестно. Данных о токенах нет. В Claude Code они появляются после ответа агента, "
               "в Кодексе — после первого сеанса в этой папке.")
 
 
 def dispatch(args):
     from contextlib import closing
-    is_registry_write = args.cmd in {'source', 'sources-add-many', 'claim', 'claims-add-many', 'revoke', 'revise', 'collect', 'ingest'}
+    is_registry_write = args.cmd in {'source', 'sources-add-many', 'claim', 'claims-add-many', 'revoke', 'revise', 'collect', 'ingest', 'incident'}
     is_workflow_write = args.cmd == 'workflow' and args.workflow_action == 'apply'
     is_gate_write = args.cmd == 'gate' and args.sub == 'confirm'
     is_research_write = args.cmd == 'research' and args.research_action in {'add', 'close'}
@@ -863,6 +920,7 @@ def main():
     s.add_argument("id"); s.add_argument("--reason", required=True)
     s.set_defaults(fn=cmd_revoke)
     s = sub.add_parser("cost", help="время, действия, токены, расходы")
+    s.add_argument("--opencode-session", help="показать одну сессию OpenCode с помощниками")
     s.add_argument("--no-codex", action="store_true", help="не подтягивать журналы Кодекса")
     s.set_defaults(fn=cmd_cost)
     s = sub.add_parser("budget", help="лимит расходов проекта")

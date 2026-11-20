@@ -14,7 +14,27 @@ def rate(numerator, denominator):
     return numerator / denominator if denominator else None
 
 
-KINDS = ('economics', 'funnel', 'retention', 'retention-change', 'growth', 'market-size', 'decision-regret')
+KINDS = ('economics', 'funnel', 'retention', 'retention-change', 'growth', 'market-size', 'decision-regret', 'run-cost')
+
+
+def run_cost(data):
+    """Add mutually exclusive expense lines; preserve unknowns and human time."""
+    from decimal import Decimal
+    currency = data.get('currency')
+    if not isinstance(currency, str) or len(currency) != 3 or not currency.isalpha():
+        raise ValueError('Укажите единую валюту из трёх букв')
+    categories = ('models', 'search', 'tools', 'retries', 'human')
+    amounts = data.get('amounts')
+    if not isinstance(amounts, dict) or set(amounts) != set(categories):
+        raise ValueError('Нужны пять статей: ' + ', '.join(categories))
+    if not isinstance(data.get('basis'), dict) or any(
+            not isinstance(data['basis'].get(k), str) or not data['basis'][k].strip() for k in categories):
+        raise ValueError('Для каждой статьи укажите основание суммы или причину пробела')
+    known = sum((Decimal(str(number(v, k))) for k, v in amounts.items() if v is not None), Decimal(0))
+    missing = [k for k, v in amounts.items() if v is None]
+    minutes = data.get('human_minutes')
+    return dict(currency=currency.upper(), known_subtotal=str(known), total=None if missing else str(known),
+                unknown=missing, human_minutes=None if minutes is None else number(minutes, 'human_minutes'))
 
 
 def decision_regret(data):
@@ -119,6 +139,8 @@ def market_size(data):
 
 
 def calculate(kind, data):
+    if kind == 'run-cost':
+        return run_cost(data)
     if kind not in KINDS:
         raise ValueError('Неизвестный вид расчёта')
     if kind == 'decision-regret':

@@ -1,5 +1,6 @@
 """Persistent research questions and read-only lookup in the methodology."""
 import http.client
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -75,10 +76,68 @@ def discover(query, limit):
         http.close()
 
 
+def trace(project, claim_id, live=False, compare=None):
+    from extra import locate_lines, numbers
+    from fetch_page import fetch
+    from extra import source_text
+
+    sources, claims = S.load(project)
+    claim = next((row for row in claims if row['id'] == claim_id), None)
+    if not claim or claim['тип'] != 'факт' or claim['статус'] != 'активно':
+        raise ValueError('Нужен действующий факт из реестра')
+    source = next((row for row in sources if row['id'] == claim['источник']), None)
+    if not source:
+        raise ValueError('Источник отсутствует в реестре')
+    external = source['адрес'].startswith(('https://', 'http://'))
+    if external:
+        body, snapshot = source_text(project, source, run=False)
+    else:
+        original = safe_path(project, source['адрес'])
+        from ingest import extract
+        body, _ = extract(original)
+        snapshot = source['адрес']
+        if live or compare:
+            raise ValueError('Локальный оригинал уже прочитан напрямую')
+    if body is None:
+        raise ValueError(snapshot)
+    where = claim['где_в_источнике']
+    quote = locate_lines(body, where)
+    if not quote or not quote.strip() or len(quote) > 1500:
+        raise ValueError('Найдите точные строки командой locate, до 1500 знаков')
+    statement = claim['утверждение']
+    for quoted in re.findall(r'«([^»]+)»|"([^"]+)"', statement):
+        fragment = next(piece for piece in quoted if piece)
+        if ' '.join(fragment.split()) not in ' '.join(quote.split()):
+            raise ValueError('Цитата утверждения отсутствует в указанных строках')
+    values = numbers(statement)
+    if not values and ' '.join(statement.split()) not in ' '.join(quote.split()):
+        raise ValueError('Для дословной цитаты текст утверждения должен совпадать с источником')
+    if not values.issubset(numbers(quote)):
+        raise ValueError('Не все числа утверждения найдены в указанных строках')
+    result = dict(claim=claim_id, statement=statement, source=source['id'],
+                  title=source['название'], url=source['адрес'], location=where,
+                  snapshot=snapshot, quote=quote, accessed=source['дата_обращения'],
+                  verification='snapshot_excerpt' if external else 'original_file_excerpt')
+    if live or compare:
+        if live:
+            published, raw, final_url, _ = fetch(source['адрес'])
+            result.update(verification='live_quote', final_url=final_url)
+        else:
+            raw = Path(compare).read_bytes()
+            published = raw.decode('utf-8-sig')
+            result.update(verification='second_text_copy', compared_file=Path(compare).name)
+        if ' '.join(quote.split()) not in ' '.join(published.split()):
+            raise ValueError('Цитата отсутствует в повторно прочитанном документе')
+        result['compared_sha256'] = hashlib.sha256(raw).hexdigest()
+    return result
+
+
 def command(a):
     try:
         if a.research_action == 'knowledge':
             result = knowledge(a.query, a.limit)
+        elif a.research_action == 'trace':
+            result = trace(S.project_dir(a.project), a.id, a.live, a.compare)
         elif a.research_action == 'discover':
             result = {'candidates': discover(a.query, a.limit), 'note': 'Кандидаты. Для доказательства сохранить через collect и сверить содержание.'}
         else:
@@ -124,6 +183,12 @@ def command(a):
 def register(sub):
     actions = sub.add_parser('research', help='вопросы к решению и поиск оснований').add_subparsers(dest='research_action', required=True)
     actions.add_parser('list').set_defaults(fn=command)
+    p = actions.add_parser('trace', help='показать исходную строку числового факта и URL публикации')
+    p.add_argument('id')
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument('--live', action='store_true', help='повторно открыть URL и проверить цитату')
+    mode.add_argument('--compare', metavar='TEXT', help='сверить с отдельно полученной текстовой копией')
+    p.set_defaults(fn=command)
     for name in ('knowledge', 'discover'):
         p = actions.add_parser(name)
         p.add_argument('query')

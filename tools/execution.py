@@ -219,8 +219,9 @@ def reserve(db, task, row, session, amount):
         work = work_info(db, task['id'])
         if work and work_spent(db, work['id']) + amount > Decimal(work['budget']):
             raise ValueError('Общего остатка по задаче недостаточно для резерва операции')
-        db.execute('INSERT INTO actions (task,id,session,status,reserve) VALUES (?,?,?,?,?)',
-                   (task['id'], row['id'], session, 'reserved', str(amount)))
+        db.execute('INSERT INTO actions (task,id,session,status,reserve,result) VALUES (?,?,?,?,?,?)',
+                   (task['id'], row['id'], session, 'reserved', str(amount),
+                    json.dumps({key: row.get(key) for key in ('provider', 'model')})))
         db.commit()
     except BaseException:
         db.rollback()
@@ -508,12 +509,20 @@ def command(a):
                     reserve(db, task, row, a.session, Decimal(row['estimated_usd']))
                     result = {'status': 'reserved', 'provider': row.get('provider'), 'model': row.get('model'), 'estimated_usd': row['estimated_usd']}
                 else:
-                    row = db.execute('SELECT status FROM actions WHERE task=? AND id=?', (a.task, a.action)).fetchone()
+                    row = db.execute('SELECT status,result FROM actions WHERE task=? AND id=?', (a.task, a.action)).fetchone()
                     if not row or row['status'] != 'reserved':
                         raise ValueError('У операции нет открытого резерва')
                     if a.command == 'record-opencode':
                         from opencode_usage import receipt as import_usage
-                        receipt = import_usage(a.events)
+                        if a.host_db:
+                            from host_route import verify
+                            assignment = json.loads(row['result']) if row['result'] else operation(task, a.action)
+                            provider = assignment['provider']
+                            receipt = verify(Path(a.events), Path(a.host_db), provider,
+                                             assignment['model'].removeprefix(provider + '/'))
+                        else:
+                            receipt = import_usage(a.events)
+                            receipt['model_verified'] = False
                         if task['billing'] != 'api':
                             receipt['opencode_estimated_usd'] = receipt['cost_usd']
                             receipt['cost_usd'] = None
@@ -570,6 +579,7 @@ def register(sub):
             p.add_argument('--receipt', required=True)
         if name == 'record-opencode':
             p.add_argument('--events', required=True)
+            p.add_argument('--host-db', help='сверить выполненную модель с локальным журналом OpenCode')
         if name == 'handoff':
             p.add_argument('--output', required=True)
         if name == 'report':
