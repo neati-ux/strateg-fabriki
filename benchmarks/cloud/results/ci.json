@@ -1,0 +1,50 @@
+[
+  {
+    "configuration": "test (macos-latest, 3.12)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 14.992,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656115"
+  },
+  {
+    "configuration": "test (windows-latest, 3.9)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 36.199,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656328"
+  },
+  {
+    "configuration": "test (ubuntu-24.04, 3.12)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 18.411,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656366"
+  },
+  {
+    "configuration": "test (macos-latest, 3.9)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 15.783,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656376"
+  },
+  {
+    "configuration": "test (windows-latest, 3.12)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 38.037,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656381"
+  },
+  {
+    "configuration": "test (ubuntu-24.04, 3.9)",
+    "conclusion": "success",
+    "tests": 66,
+    "suite_seconds": 22.796,
+    "unittest": "OK",
+    "url": "https://github.com/neati-ux/strateg-fabriki/actions/runs/44878255417/job/136767656462"
+  }
+]
