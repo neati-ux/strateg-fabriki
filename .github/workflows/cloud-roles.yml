@@ -1,0 +1,40 @@
+name: Cloud role comparison
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/cloud-roles.yml'
+      - 'benchmarks/cloud/compare.py'
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      MODELS: ${{ runner.temp }}/weights
+      CLOUD_RESULTS: ${{ runner.temp }}/results
+      OPENBLAS_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install inference runtime
+        run: pip install 'numpy<2' 'https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.19/llama_cpp_python-0.3.19-cp311-cp311-linux_x86_64.whl'
+      - name: Download pinned public weights
+        run: |
+          mkdir -p "$MODELS" "$CLOUD_RESULTS"
+          curl -fLsS --retry 3 -o "$MODELS/1.5B.gguf" 'https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/9eadc66189c7641e1ddd226b8267a9119b2ce2d4/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf'
+          curl -fLsS --retry 3 -o "$MODELS/0.5B.gguf" 'https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/41ba88dbac95fed2528c92514c131d73eb5a174b/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf'
+      - name: Run three arms
+        run: |
+          python benchmarks/cloud/compare.py chat
+          python benchmarks/cloud/compare.py single
+          python benchmarks/cloud/compare.py routed
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloud-comparison
+          path: ${{ runner.temp }}/results/*.json
+          if-no-files-found: warn
