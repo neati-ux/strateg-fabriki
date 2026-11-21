@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      MODELS: ${{ runner.temp }}/weights
-      CLOUD_RESULTS: ${{ runner.temp }}/results
+      MODELS: /tmp/strateg-weights
+      CLOUD_RESULTS: /tmp/strateg-results
       OPENBLAS_NUM_THREADS: "2"
     steps:
       - uses: actions/checkout@v4
@@ -36,5 +36,5 @@ jobs:
         if: always()
         with:
           name: cloud-comparison
-          path: ${{ runner.temp }}/results/*.json
+          path: /tmp/strateg-results/*.json
           if-no-files-found: warn
