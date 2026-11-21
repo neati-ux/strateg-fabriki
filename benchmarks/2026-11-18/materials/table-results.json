@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "cli": [
+    "new",
+    "profile-table",
+    "collect"
+  ],
+  "input_rows": [
+    [
+      "id",
+      "amount",
+      "unit"
+    ],
+    [
+      "A",
+      "100",
+      "RUB/week"
+    ],
+    [
+      "A",
+      "100",
+      "RUB/week"
+    ],
+    [
+      "B",
+      "",
+      "RUB/week"
+    ],
+    [
+      "C",
+      "600",
+      "RUB/month"
+    ]
+  ],
+  "csv_profile": {
+    "columns": [
+      "id",
+      "amount",
+      "unit"
+    ],
+    "rows": 4,
+    "delimiter": ";",
+    "missing_by_column": {
+      "id": 0,
+      "amount": 1,
+      "unit": 0
+    },
+    "duplicate_rows_after_first": 1,
+    "key": "id",
+    "duplicate_keys_after_first": 1,
+    "first_irregular_rows": []
+  },
+  "unique_sources_after_four_imports": 2,
+  "xlsx_checks": [
+    "cell addresses and duplicate values",
+    "missing value not replaced by zero",
+    "formula identified as not recalculated",
+    "original bytes preserved"
+  ],
+  "unit_check": "Both unit labels preserved; automatic detection of incompatible periods was not tested.",
+  "fixture_csv_sha256": "bb0364fe59841cdd36bdc80de56b273967fcc5b6cad33cb30d67eac8a528e836"
+}

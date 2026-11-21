@@ -1,0 +1,20 @@
+{
+  "source_name": "interview.wav",
+  "source_sha256": "23db0bc55e2b77c54a47107b92da939b5aceee73c2010f0a2bdc21a834454c0f",
+  "transcript_sha256": "b7ad20ff3e29edb2d7c4952918ec0eccab97c4f5ac847fb7135ab8e354f4d478",
+  "engine": "local-faster-whisper:Systran--faster-whisper-tiny/snapshots/d90ca5fe260221311c53c58e660288d3deb8d356",
+  "created_at": "2026-11-18T18:38:13.644155+00:00",
+  "verification": "Требуется сверка существенных цитат с оригиналом",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "text": "The school opened on Monday."
+    },
+    {
+      "start": 2.0,
+      "end": 6.0,
+      "text": "Students asked for a reminder before the next lesson."
+    }
+  ]
+}

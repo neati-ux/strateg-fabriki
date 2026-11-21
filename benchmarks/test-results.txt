@@ -1,0 +1,73 @@
+test_sync_preserves_body_and_is_idempotent (test_backend_gaps.BackendGaps.test_sync_preserves_body_and_is_idempotent) ... ok
+test_sync_rollback_preserves_concurrent_edit (test_backend_gaps.BackendGaps.test_sync_rollback_preserves_concurrent_edit) ... ok
+test_sync_validates_all_before_writing (test_backend_gaps.BackendGaps.test_sync_validates_all_before_writing) ... ok
+test_ux_registers_saved_artifact (test_backend_gaps.BackendGaps.test_ux_registers_saved_artifact) ... ok
+test_ux_validates_scenario_and_captures_steps (test_backend_gaps.BackendGaps.test_ux_validates_scenario_and_captures_steps) ... ok
+test_schedule_for_library_pilot (test_calendar.CalendarTest.test_schedule_for_library_pilot) ... ok
+test_all_unknown_explains_order (test_capabilities.RoutingTests.test_all_unknown_explains_order) ... ok
+test_empty_inventory_refuses_to_invent_model (test_capabilities.RoutingTests.test_empty_inventory_refuses_to_invent_model) ... ok
+test_inspect_does_not_claim_models (test_capabilities.RoutingTests.test_inspect_does_not_claim_models) ... ok
+test_lowest_price_among_eligible (test_capabilities.RoutingTests.test_lowest_price_among_eligible) ... ok
+test_mixed_price_basis_rejected (test_capabilities.RoutingTests.test_mixed_price_basis_rejected) ... ok
+test_rejects_unproven_or_invalid_availability (test_capabilities.RoutingTests.test_rejects_unproven_or_invalid_availability) ... ok
+test_single_eligible_fallback_is_explicit (test_capabilities.RoutingTests.test_single_eligible_fallback_is_explicit) ... ok
+test_unavailable_and_wrong_role_never_selected (test_capabilities.RoutingTests.test_unavailable_and_wrong_role_never_selected) ... ok
+test_unknown_prices_are_not_zero (test_capabilities.RoutingTests.test_unknown_prices_are_not_zero) ... ok
+test_summary_preserves_approval_status (test_decision_threshold.DecisionThresholdTest.test_summary_preserves_approval_status) ... ok
+test_incident_repeated_once (test_host_evidence.HostEvidence.test_incident_repeated_once) ... ok
+test_nested_sessions_overlap_and_separate_projects (test_host_evidence.HostEvidence.test_nested_sessions_overlap_and_separate_projects) ... ok
+test_credentials_and_file_scheme_rejected (test_inputs.Inputs.test_credentials_and_file_scheme_rejected) ... ok
+test_empty_transcript_rejected (test_inputs.Inputs.test_empty_transcript_rejected) ... ok
+test_hidden_html_not_evidence (test_inputs.Inputs.test_hidden_html_not_evidence) ... ok
+test_invalid_times_rejected (test_inputs.Inputs.test_invalid_times_rejected) ... ok
+test_private_address_rejected (test_inputs.Inputs.test_private_address_rejected) ... ok
+test_timestamped_text_preserved_as_data (test_inputs.Inputs.test_timestamped_text_preserved_as_data) ... ok
+test_catalog_is_listed_not_verified (test_route_selection.Routing.test_catalog_is_listed_not_verified) ... ok
+test_custom_assignment_respects_inventory_and_budget (test_route_selection.Routing.test_custom_assignment_respects_inventory_and_budget) ... ok
+test_batch_is_all_or_nothing_and_links_inside (test_strateg.Batch.test_batch_is_all_or_nothing_and_links_inside) ... ok
+test_batch_sources (test_strateg.Batch.test_batch_sources) ... ok
+test_codex_log_is_imported_once_and_only_for_this_folder (test_strateg.CostAndHooks.test_codex_log_is_imported_once_and_only_for_this_folder) ... ok
+test_cost_uses_prices_and_shows_routing_saving (test_strateg.CostAndHooks.test_cost_uses_prices_and_shows_routing_saving) ... ok
+test_cost_without_price_does_not_crash (test_strateg.CostAndHooks.test_cost_without_price_does_not_crash) ... ok
+test_hook_blocks_text_with_unknown_claim (test_strateg.CostAndHooks.test_hook_blocks_text_with_unknown_claim) ... ok
+test_hook_logs_action_and_masks_secrets (test_strateg.CostAndHooks.test_hook_logs_action_and_masks_secrets) ... ok
+test_hook_survives_garbage_input (test_strateg.CostAndHooks.test_hook_survives_garbage_input) ... ok
+test_session_start_hook_restores_state (test_strateg.CostAndHooks.test_session_start_hook_restores_state) ... ok
+test_strategy_without_chosen_option_is_an_error (test_strateg.Gates.test_strategy_without_chosen_option_is_an_error) ... ok
+test_work_without_confirmed_task_is_an_error (test_strateg.Gates.test_work_without_confirmed_task_is_an_error) ... ok
+test_extractor_waits_for_a_long_document_or_a_saved_page (test_strateg.HelpersRouting.test_extractor_waits_for_a_long_document_or_a_saved_page) ... ok
+test_fresh_project_has_nothing_to_explain (test_strateg.HelpersRouting.test_fresh_project_has_nothing_to_explain) ... ok
+test_real_interview_removes_the_respondent_condition (test_strateg.HelpersRouting.test_real_interview_removes_the_respondent_condition) ... ok
+test_screenshots_are_not_counted_as_long_documents (test_strateg.HelpersRouting.test_screenshots_are_not_counted_as_long_documents) ... ok
+test_skip_needs_a_reason (test_strateg.HelpersRouting.test_skip_needs_a_reason) ... ok
+test_table_requires_analyst_until_the_call_is_recorded (test_strateg.HelpersRouting.test_table_requires_analyst_until_the_call_is_recorded) ... ok
+test_lists_tools_and_enforces_registry_rules (test_strateg.Mcp.test_lists_tools_and_enforces_registry_rules) ... ok
+test_assumption_needs_reason (test_strateg.NewCommands.test_assumption_needs_reason) ... ok
+test_budget_warns_and_stops (test_strateg.NewCommands.test_budget_warns_and_stops) ... ok
+test_doctor_passes_on_complete_copy (test_strateg.NewCommands.test_doctor_passes_on_complete_copy) ... ok
+test_due_flags_decision_with_changed_grounds_or_past_date (test_strateg.NewCommands.test_due_flags_decision_with_changed_grounds_or_past_date) ... ok
+test_agent_answer_cannot_become_a_fact (test_strateg.Registry.test_agent_answer_cannot_become_a_fact) ... ok
+test_fact_needs_place_in_source (test_strateg.Registry.test_fact_needs_place_in_source) ... ok
+test_fact_without_source_is_rejected (test_strateg.Registry.test_fact_without_source_is_rejected) ... ok
+test_gap_needs_reason (test_strateg.Registry.test_gap_needs_reason) ... ok
+test_html_comment_is_not_a_reference (test_strateg.Registry.test_html_comment_is_not_a_reference) ... ok
+test_inference_needs_grounds_and_fact_has_none (test_strateg.Registry.test_inference_needs_grounds_and_fact_has_none) ... ok
+test_inference_without_any_fact_gets_warning (test_strateg.Registry.test_inference_without_any_fact_gets_warning) ... ok
+test_new_project_is_active_and_clean (test_strateg.Registry.test_new_project_is_active_and_clean) ... ok
+test_synthetic_interview_cannot_prove_a_fact (test_strateg.Registry.test_synthetic_interview_cannot_prove_a_fact) ... ok
+test_text_cannot_cite_missing_or_revoked_claim (test_strateg.Registry.test_text_cannot_cite_missing_or_revoked_claim) ... ok
+test_report_links_claims_to_registry (test_strateg.Report.test_report_links_claims_to_registry) ... ok
+test_decision_on_changed_grounds_is_flagged (test_strateg.Revision.test_decision_on_changed_grounds_is_flagged) ... ok
+test_impact_by_source (test_strateg.Revision.test_impact_by_source) ... ok
+test_revoke_cascades_to_dependents_and_lists_texts (test_strateg.Revision.test_revoke_cascades_to_dependents_and_lists_texts) ... ok
+test_why_shows_chain_to_source (test_strateg.Revision.test_why_shows_chain_to_source) ... ok
+test_calculation_is_rerun (test_strateg.Verify.test_calculation_is_rerun) ... ok
+test_numbers_and_quotes_are_checked_against_source (test_strateg.Verify.test_numbers_and_quotes_are_checked_against_source) ... ok
+test_overlapping_exports_and_conflicting_labels (test_unique_categories.UniqueCategoriesTest.test_overlapping_exports_and_conflicting_labels) ... ok
+
+----------------------------------------------------------------------
+Ran 66 tests in 51.784s
+
+OK
+S-001
+materials/ux/bfaa46192fc2bec5fa1f9091598cdf56f9fc14c5737f3087f5ab952ba76244c4/content.md

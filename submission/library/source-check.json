@@ -1,0 +1,14 @@
+{
+  "claim": "C-002",
+  "statement": "labels          63 octets or less",
+  "source": "S-008",
+  "title": "RFC 1035 — отдельный контроль поиска по оригиналу",
+  "url": "https://www.rfc-editor.org/rfc/rfc1035.txt",
+  "location": "строка 532",
+  "snapshot": "rfc1035.txt",
+  "quote": "labels          63 octets or less",
+  "accessed": "2026-11-20",
+  "verification": "second_text_copy",
+  "compared_file": "rfc-second.txt",
+  "compared_sha256": "d14ae809fc9b41bbcae26bb38c937c9515808b944f3252b00de9fe0e95f4fdfb"
+}
