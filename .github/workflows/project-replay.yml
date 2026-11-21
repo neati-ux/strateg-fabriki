@@ -1,0 +1,39 @@
+name: Browser and project replay
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/project-replay.yml'
+      - 'tests/browser_smoke.py'
+      - 'tools/ux_capture.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.browser-runtime/browsers
+        run: |
+          pip install -r requirements-browser.txt
+          python -m playwright install --with-deps chromium
+      - name: Exercise the browser with a two-screen fixture
+        run: python tests/browser_smoke.py
+      - name: Reopen the saved project and regenerate the deliverable
+        run: |
+          python tools/strateg.py use ryadom-prodazhi
+          python tools/strateg.py check
+          python tools/strateg.py verify
+          rm projects/ryadom-prodazhi/outputs/REPORT.html
+          python tools/strateg.py report
+          test -s projects/ryadom-prodazhi/outputs/REPORT.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-report
+          path: projects/ryadom-prodazhi/outputs/REPORT.html
